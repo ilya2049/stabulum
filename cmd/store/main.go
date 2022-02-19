@@ -2,14 +2,14 @@ package main
 
 import (
 	"log"
-	appproduct "stabulum/internal/app/product"
 	"stabulum/internal/domain/product"
-	pgproduct "stabulum/internal/infrastructure/postgres/product"
+	"stabulum/internal/infrastructure/di"
 )
 
 func main() {
-	productRepostiory := pgproduct.NewRepostiory()
-	productUsecases := appproduct.NewUsecases(productRepostiory)
+	diContainer := di.NewContainer()
+
+	productUsecases := diContainer.ProductUsecases
 
 	if err := productUsecases.Create(product.New("Sticker")); err != nil {
 		log.Println("failed to create a product:", err.Error())
