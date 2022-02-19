@@ -5,10 +5,10 @@ import (
 )
 
 type Container struct {
-	ProductUsecases *product.Usecases
+	ProductUsecases product.Usecases
 }
 
-func newContainer(productUsecases *product.Usecases) *Container {
+func newContainer(productUsecases product.Usecases) *Container {
 	return &Container{
 		ProductUsecases: productUsecases,
 	}

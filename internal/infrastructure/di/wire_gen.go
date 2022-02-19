@@ -7,8 +7,11 @@
 package di
 
 import (
+	"github.com/google/wire"
 	product2 "stabulum/internal/app/product"
+	product3 "stabulum/internal/domain/product"
 	"stabulum/internal/infrastructure/postgres/product"
+	"stabulum/internal/infrastructure/postgres/product/stub"
 )
 
 // Injectors from wire.go:
@@ -19,3 +22,16 @@ func NewContainer() *Container {
 	container := newContainer(usecases)
 	return container
 }
+
+func NewTestContainer() *Container {
+	productRepository := stub.NewProductRepository()
+	usecases := product2.NewUsecases(productRepository)
+	container := newContainer(usecases)
+	return container
+}
+
+// wire.go:
+
+var productPostgresRepositorySet = wire.NewSet(wire.Bind(new(product3.Repository), new(*product.Repository)), product.NewRepostiory)
+
+var productStubRepositorySet = wire.NewSet(wire.Bind(new(product3.Repository), new(*stub.ProductRepository)), stub.NewProductRepository)

@@ -1,17 +1,14 @@
 package product
 
-import "stabulum/internal/domain/product"
+import (
+	"context"
+	"stabulum/internal/domain/product"
+)
 
-type Usecases struct {
+type usecases struct {
 	productRepostiory product.Repository
 }
 
-func NewUsecases(productRepostiory product.Repository) *Usecases {
-	return &Usecases{
-		productRepostiory: productRepostiory,
-	}
-}
-
-func (u *Usecases) Create(p product.Product) error {
-	return u.productRepostiory.Add(p)
+func (u *usecases) Create(ctx context.Context, p product.Product) error {
+	return u.productRepostiory.Add(ctx, p)
 }
