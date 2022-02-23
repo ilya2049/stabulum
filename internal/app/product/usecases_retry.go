@@ -9,12 +9,9 @@ import (
 
 type usecasesRetry struct {
 	next Usecases
-}
 
-const (
-	maxAttemtp = 10
-	retryDelay = time.Second
-)
+	config UsecasesRetryConfig
+}
 
 func (u *usecasesRetry) Create(ctx context.Context, p product.Product) (err error) {
 	attempt := 1
@@ -24,13 +21,13 @@ func (u *usecasesRetry) Create(ctx context.Context, p product.Product) (err erro
 			return nil
 		}
 
-		if attempt > maxAttemtp {
+		if attempt > u.config.MaxAttemtp {
 			return err
 		}
 
 		log.Println("usecase products create", "attempt", attempt, "error", err.Error())
 
 		attempt++
-		time.Sleep(retryDelay)
+		time.Sleep(u.config.RetryDelay)
 	}
 }

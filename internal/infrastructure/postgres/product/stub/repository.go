@@ -7,23 +7,30 @@ import (
 	"stabulum/internal/domain/product"
 )
 
-type ProductRepository struct {
-	attempt int
+type ProductRepositoryConfig struct {
+	MaxFailedAttempt int
 }
 
-func NewProductRepository() *ProductRepository {
-	r := &ProductRepository{}
+type ProductRepository struct {
+	attempt int
+
+	cfg ProductRepositoryConfig
+}
+
+func NewProductRepository(cfg ProductRepositoryConfig) *ProductRepository {
+	r := &ProductRepository{
+		cfg: cfg,
+	}
+
 	r.resetAttempt()
 
 	return r
 }
 
-const maxFailedAttempt = 14
-
 var errAddProduct = errors.New("failed to add a product to the stub repository")
 
 func (r *ProductRepository) Add(_ context.Context, p product.Product) error {
-	if r.attempt > maxFailedAttempt {
+	if r.attempt > r.cfg.MaxFailedAttempt {
 		r.resetAttempt()
 
 		log.Println("product added in the stub repository:", p.String())

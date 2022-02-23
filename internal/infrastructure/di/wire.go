@@ -6,16 +6,18 @@ package di
 import (
 	appproduct "stabulum/internal/app/product"
 	"stabulum/internal/domain/product"
+	"stabulum/internal/infrastructure/config"
 	pgproduct "stabulum/internal/infrastructure/postgres/product"
 	productstub "stabulum/internal/infrastructure/postgres/product/stub"
 
 	"github.com/google/wire"
 )
 
-func NewContainer() *Container {
+func NewContainer(cfg config.Config) *Container {
 	panic(
 		wire.Build(
 			newContainer,
+			configSet,
 
 			appproduct.NewUsecases,
 
@@ -24,15 +26,21 @@ func NewContainer() *Container {
 	)
 }
 
+var configSet = wire.NewSet(
+	config.NewUsecasesConfig,
+	config.NewProductRepositoryStubConfig,
+)
+
 var productPostgresRepositorySet = wire.NewSet(
 	wire.Bind(new(product.Repository), new(*pgproduct.Repository)),
 	pgproduct.NewRepostiory,
 )
 
-func NewTestContainer() *Container {
+func NewTestContainer(cfg config.Config) *Container {
 	panic(
 		wire.Build(
 			newContainer,
+			configSet,
 
 			appproduct.NewUsecases,
 

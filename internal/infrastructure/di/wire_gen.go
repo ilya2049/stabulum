@@ -10,27 +10,33 @@ import (
 	"github.com/google/wire"
 	product2 "stabulum/internal/app/product"
 	product3 "stabulum/internal/domain/product"
+	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/postgres/product"
 	"stabulum/internal/infrastructure/postgres/product/stub"
 )
 
 // Injectors from wire.go:
 
-func NewContainer() *Container {
+func NewContainer(cfg config.Config) *Container {
+	usecasesConfig := config.NewUsecasesConfig(cfg)
 	repository := product.NewRepostiory()
-	usecases := product2.NewUsecases(repository)
+	usecases := product2.NewUsecases(usecasesConfig, repository)
 	container := newContainer(usecases)
 	return container
 }
 
-func NewTestContainer() *Container {
-	productRepository := stub.NewProductRepository()
-	usecases := product2.NewUsecases(productRepository)
+func NewTestContainer(cfg config.Config) *Container {
+	usecasesConfig := config.NewUsecasesConfig(cfg)
+	productRepositoryConfig := config.NewProductRepositoryStubConfig(cfg)
+	productRepository := stub.NewProductRepository(productRepositoryConfig)
+	usecases := product2.NewUsecases(usecasesConfig, productRepository)
 	container := newContainer(usecases)
 	return container
 }
 
 // wire.go:
+
+var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewProductRepositoryStubConfig)
 
 var productPostgresRepositorySet = wire.NewSet(wire.Bind(new(product3.Repository), new(*product.Repository)), product.NewRepostiory)
 
