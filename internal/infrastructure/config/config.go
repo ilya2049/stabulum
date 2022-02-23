@@ -5,8 +5,7 @@ import (
 )
 
 type Config struct {
-	ProductUsecasesConfig       ProductUsecasesConfig
-	ProductRepositoryStubConfig ProductRepositoryStubConfig
+	ProductUsecasesConfig ProductUsecasesConfig
 }
 
 type ProductUsecasesConfig struct {
@@ -16,8 +15,4 @@ type ProductUsecasesConfig struct {
 type ProductUsecasesRetryConfig struct {
 	MaxAttemtp int
 	RetryDelay time.Duration
-}
-
-type ProductRepositoryStubConfig struct {
-	MaxFailedAttempt int
 }

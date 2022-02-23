@@ -4,9 +4,13 @@ import (
 	"context"
 	"log"
 	"stabulum/internal/domain/product"
+	mockproduct "stabulum/internal/domain/product/mocks"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/di"
+	"stabulum/internal/testfixture"
 	"time"
+
+	"github.com/stretchr/testify/mock"
 )
 
 func main() {
@@ -17,10 +21,27 @@ func main() {
 				RetryDelay: time.Second,
 			},
 		},
-		ProductRepositoryStubConfig: config.ProductRepositoryStubConfig{
-			MaxFailedAttempt: 14,
+	},
+		config.MockConfig{
+			ConfigureProductRepository: func(r *mockproduct.Repository) {
+				const maxFailedAttempt = 5
+				attempt := 1
+
+				r.On("Add", mock.Anything, mock.Anything).
+					Return(func(_ context.Context, p product.Product) error {
+						if attempt >= maxFailedAttempt {
+							log.Println("product added in the mock repository:", p.String())
+
+							return nil
+						}
+
+						attempt++
+
+						return testfixture.ErrTestUnexpected
+					})
+			},
 		},
-	})
+	)
 
 	productUsecases := diContainer.ProductUsecases
 

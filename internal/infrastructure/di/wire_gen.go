@@ -10,9 +10,9 @@ import (
 	"github.com/google/wire"
 	product2 "stabulum/internal/app/product"
 	product3 "stabulum/internal/domain/product"
+	"stabulum/internal/domain/product/mocks"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/postgres/product"
-	"stabulum/internal/infrastructure/postgres/product/stub"
 )
 
 // Injectors from wire.go:
@@ -25,19 +25,18 @@ func NewContainer(cfg config.Config) *Container {
 	return container
 }
 
-func NewTestContainer(cfg config.Config) *Container {
+func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) *Container {
 	usecasesConfig := config.NewUsecasesConfig(cfg)
-	productRepositoryConfig := config.NewProductRepositoryStubConfig(cfg)
-	productRepository := stub.NewProductRepository(productRepositoryConfig)
-	usecases := product2.NewUsecases(usecasesConfig, productRepository)
+	repository := config.NewProductRepositoryMock(mockCfg)
+	usecases := product2.NewUsecases(usecasesConfig, repository)
 	container := newContainer(usecases)
 	return container
 }
 
 // wire.go:
 
-var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewProductRepositoryStubConfig)
+var configSet = wire.NewSet(config.NewUsecasesConfig)
 
 var productPostgresRepositorySet = wire.NewSet(wire.Bind(new(product3.Repository), new(*product.Repository)), product.NewRepostiory)
 
-var productStubRepositorySet = wire.NewSet(wire.Bind(new(product3.Repository), new(*stub.ProductRepository)), stub.NewProductRepository)
+var productMockRepositorySet = wire.NewSet(wire.Bind(new(product3.Repository), new(*mocks.Repository)), config.NewProductRepositoryMock)
