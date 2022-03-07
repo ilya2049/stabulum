@@ -2,13 +2,20 @@ package config
 
 import (
 	"stabulum/internal/app/product"
+	"stabulum/internal/infrastructure/httpserver"
 )
 
 func NewUsecasesConfig(cfg Config) product.UsecasesConfig {
 	return product.UsecasesConfig{
 		Retry: product.UsecasesRetryConfig{
-			MaxAttemtp: cfg.ProductUsecasesConfig.Retry.MaxAttemtp,
-			RetryDelay: cfg.ProductUsecasesConfig.Retry.RetryDelay,
+			MaxAttemtp: cfg.ProductUsecases.Retry.MaxAttemtp,
+			RetryDelay: cfg.ProductUsecases.Retry.RetryDelay,
 		},
+	}
+}
+
+func NewHTTPServerConfig(cfg Config) httpserver.Config {
+	return httpserver.Config{
+		Adderss: cfg.API.HTTPServer.Address,
 	}
 }

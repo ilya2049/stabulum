@@ -4,12 +4,18 @@
 package di
 
 import (
+	"net/http"
+
 	appproduct "stabulum/internal/app/product"
 	"stabulum/internal/domain/product"
 	mockproduct "stabulum/internal/domain/product/mocks"
+	"stabulum/internal/infrastructure/api/router"
+	apiproduct "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
+	"stabulum/internal/infrastructure/httpserver"
 	pgproduct "stabulum/internal/infrastructure/postgres/product"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
@@ -18,6 +24,8 @@ func NewContainer(cfg config.Config) *Container {
 		wire.Build(
 			newContainer,
 			configSet,
+
+			apiSet,
 
 			appproduct.NewUsecases,
 
@@ -28,6 +36,15 @@ func NewContainer(cfg config.Config) *Container {
 
 var configSet = wire.NewSet(
 	config.NewUsecasesConfig,
+	config.NewHTTPServerConfig,
+)
+
+var apiSet = wire.NewSet(
+	wire.Bind(new(http.Handler), new(*gin.Engine)),
+	httpserver.New,
+	router.New,
+
+	apiproduct.NewHandler,
 )
 
 var productPostgresRepositorySet = wire.NewSet(
@@ -40,6 +57,8 @@ func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) *Container {
 		wire.Build(
 			newContainer,
 			configSet,
+
+			apiSet,
 
 			appproduct.NewUsecases,
 

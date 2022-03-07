@@ -1,15 +1,15 @@
 package di
 
 import (
-	"stabulum/internal/app/product"
+	"stabulum/internal/infrastructure/httpserver"
 )
 
 type Container struct {
-	ProductUsecases product.Usecases
+	APIHTTPServer *httpserver.Server
 }
 
-func newContainer(productUsecases product.Usecases) *Container {
+func newContainer(apiHTTPServer *httpserver.Server) *Container {
 	return &Container{
-		ProductUsecases: productUsecases,
+		APIHTTPServer: apiHTTPServer,
 	}
 }

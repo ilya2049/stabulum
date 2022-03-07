@@ -5,7 +5,8 @@ import (
 )
 
 type Config struct {
-	ProductUsecasesConfig ProductUsecasesConfig
+	API             APIConfig
+	ProductUsecases ProductUsecasesConfig
 }
 
 type ProductUsecasesConfig struct {
@@ -15,4 +16,12 @@ type ProductUsecasesConfig struct {
 type ProductUsecasesRetryConfig struct {
 	MaxAttemtp int
 	RetryDelay time.Duration
+}
+
+type APIConfig struct {
+	HTTPServer APIHTTPServerConfig
+}
+
+type APIHTTPServerConfig struct {
+	Address string
 }
