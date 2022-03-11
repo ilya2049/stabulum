@@ -24,17 +24,21 @@ import (
 func NewContainer(cfg config.Config) (*Container, connection.Close, error) {
 	panic(
 		wire.Build(
-			newContainer,
-			configSet,
+			appSet,
 
-			apiSet,
-
-			appproduct.NewUsecases,
-
-			productPostgresRepositorySet,
+			productionOutgointAdapterSet,
 		),
 	)
 }
+
+var appSet = wire.NewSet(
+	newContainer,
+	configSet,
+
+	apiSet,
+
+	appproduct.NewUsecases,
+)
 
 var configSet = wire.NewSet(
 	config.NewUsecasesConfig,
@@ -49,6 +53,10 @@ var apiSet = wire.NewSet(
 	apiproduct.NewHandler,
 )
 
+var productionOutgointAdapterSet = wire.NewSet(
+	productPostgresRepositorySet,
+)
+
 var productPostgresRepositorySet = wire.NewSet(
 	postgres.NewConnection,
 
@@ -59,17 +67,16 @@ var productPostgresRepositorySet = wire.NewSet(
 func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) (*Container, connection.Close, error) {
 	panic(
 		wire.Build(
-			newContainer,
-			configSet,
+			appSet,
 
-			apiSet,
-
-			appproduct.NewUsecases,
-
-			productMockRepositorySet,
+			testOutgointAdapterSet,
 		),
 	)
 }
+
+var testOutgointAdapterSet = wire.NewSet(
+	productMockRepositorySet,
+)
 
 var productMockRepositorySet = wire.NewSet(
 	wire.Bind(new(product.Repository), new(*mockproduct.Repository)),

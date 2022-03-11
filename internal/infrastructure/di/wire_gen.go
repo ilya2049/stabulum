@@ -56,10 +56,25 @@ func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) (*Container,
 
 // wire.go:
 
+var appSet = wire.NewSet(
+	newContainer,
+	configSet,
+
+	apiSet, product2.NewUsecases,
+)
+
 var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewHTTPServerConfig)
 
 var apiSet = wire.NewSet(wire.Bind(new(http.Handler), new(*gin.Engine)), httpserver.New, router.New, product3.NewHandler)
 
+var productionOutgointAdapterSet = wire.NewSet(
+	productPostgresRepositorySet,
+)
+
 var productPostgresRepositorySet = wire.NewSet(postgres.NewConnection, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
+
+var testOutgointAdapterSet = wire.NewSet(
+	productMockRepositorySet,
+)
 
 var productMockRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks.Repository)), config.NewProductRepositoryMock)
