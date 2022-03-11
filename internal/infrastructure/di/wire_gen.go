@@ -12,13 +12,14 @@ import (
 	"net/http"
 	product2 "stabulum/internal/app/product"
 	product4 "stabulum/internal/domain/product"
-	"stabulum/internal/domain/product/mocks"
+	mocks2 "stabulum/internal/domain/product/mocks"
 	"stabulum/internal/infrastructure/api/router"
 	product3 "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/httpserver"
 	"stabulum/internal/infrastructure/postgres"
 	"stabulum/internal/infrastructure/postgres/product"
+	"stabulum/internal/testfixture/mocks"
 )
 
 // Injectors from wire.go:
@@ -41,23 +42,20 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 	}, nil
 }
 
-func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) (*Container, func(), error) {
-	httpserverConfig := config.NewHTTPServerConfig(cfg)
+func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 	usecasesConfig := config.NewUsecasesConfig(cfg)
-	repository := config.NewProductRepositoryMock(mockCfg)
+	repository := mocks.NewProductRepositoryMock(mockCfg)
 	usecases := product2.NewUsecases(usecasesConfig, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
-	server := httpserver.New(httpserverConfig, engine)
-	container := newContainer(server)
-	return container, func() {
-	}, nil
+	server := httpserver.NewTestServer(engine)
+	testContainer := newTestContainer(server)
+	return testContainer
 }
 
 // wire.go:
 
 var appSet = wire.NewSet(
-	newContainer,
 	configSet,
 
 	apiSet, product2.NewUsecases,
@@ -67,14 +65,16 @@ var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewHTTPServerConfig
 
 var apiSet = wire.NewSet(wire.Bind(new(http.Handler), new(*gin.Engine)), httpserver.New, router.New, product3.NewHandler)
 
-var productionOutgointAdapterSet = wire.NewSet(
+var productionDependenciesSet = wire.NewSet(
+	newContainer,
+
 	productPostgresRepositorySet,
 )
 
 var productPostgresRepositorySet = wire.NewSet(postgres.NewConnection, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
 
-var testOutgointAdapterSet = wire.NewSet(
-	productMockRepositorySet,
+var testDependenciesSet = wire.NewSet(
+	newTestContainer, httpserver.NewTestServer, productMockRepositorySet,
 )
 
-var productMockRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks.Repository)), config.NewProductRepositoryMock)
+var productMockRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks2.Repository)), mocks.NewProductRepositoryMock)

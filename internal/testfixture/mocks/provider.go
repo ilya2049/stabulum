@@ -1,10 +1,10 @@
-package config
+package mocks
 
 import (
 	mockproduct "stabulum/internal/domain/product/mocks"
 )
 
-func NewProductRepositoryMock(cfg MockConfig) *mockproduct.Repository {
+func NewProductRepositoryMock(cfg Config) *mockproduct.Repository {
 	r := mockproduct.Repository{}
 
 	if cfg.ConfigureProductRepository != nil {

@@ -16,6 +16,7 @@ import (
 	"stabulum/internal/infrastructure/postgres"
 	pgproduct "stabulum/internal/infrastructure/postgres/product"
 	"stabulum/internal/pkg/connection"
+	"stabulum/internal/testfixture/mocks"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
@@ -26,13 +27,12 @@ func NewContainer(cfg config.Config) (*Container, connection.Close, error) {
 		wire.Build(
 			appSet,
 
-			productionOutgointAdapterSet,
+			productionDependenciesSet,
 		),
 	)
 }
 
 var appSet = wire.NewSet(
-	newContainer,
 	configSet,
 
 	apiSet,
@@ -53,7 +53,9 @@ var apiSet = wire.NewSet(
 	apiproduct.NewHandler,
 )
 
-var productionOutgointAdapterSet = wire.NewSet(
+var productionDependenciesSet = wire.NewSet(
+	newContainer,
+
 	productPostgresRepositorySet,
 )
 
@@ -64,21 +66,24 @@ var productPostgresRepositorySet = wire.NewSet(
 	pgproduct.NewRepository,
 )
 
-func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) (*Container, connection.Close, error) {
+func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 	panic(
 		wire.Build(
 			appSet,
 
-			testOutgointAdapterSet,
+			testDependenciesSet,
 		),
 	)
 }
 
-var testOutgointAdapterSet = wire.NewSet(
+var testDependenciesSet = wire.NewSet(
+	newTestContainer,
+	httpserver.NewTestServer,
+
 	productMockRepositorySet,
 )
 
 var productMockRepositorySet = wire.NewSet(
 	wire.Bind(new(product.Repository), new(*mockproduct.Repository)),
-	config.NewProductRepositoryMock,
+	mocks.NewProductRepositoryMock,
 )

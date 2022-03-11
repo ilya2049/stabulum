@@ -1,9 +1,9 @@
-package config
+package mocks
 
 import (
 	mockproduct "stabulum/internal/domain/product/mocks"
 )
 
-type MockConfig struct {
+type Config struct {
 	ConfigureProductRepository func(*mockproduct.Repository)
 }

@@ -7,9 +7,8 @@ import (
 )
 
 func main() {
-	diContainer, closeConnections, err := di.NewTestContainer(
+	diContainer, closeConnections, err := di.NewContainer(
 		config.ReadFromMemory(),
-		config.ReadFromMemoryMockConfig(),
 	)
 
 	if err != nil {
