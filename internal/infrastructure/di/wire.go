@@ -13,13 +13,15 @@ import (
 	apiproduct "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/httpserver"
+	"stabulum/internal/infrastructure/postgres"
 	pgproduct "stabulum/internal/infrastructure/postgres/product"
+	"stabulum/internal/pkg/connection"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
-func NewContainer(cfg config.Config) *Container {
+func NewContainer(cfg config.Config) (*Container, connection.Close, error) {
 	panic(
 		wire.Build(
 			newContainer,
@@ -48,11 +50,13 @@ var apiSet = wire.NewSet(
 )
 
 var productPostgresRepositorySet = wire.NewSet(
+	postgres.NewConnection,
+
 	wire.Bind(new(product.Repository), new(*pgproduct.Repository)),
-	pgproduct.NewRepostiory,
+	pgproduct.NewRepository,
 )
 
-func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) *Container {
+func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) (*Container, connection.Close, error) {
 	panic(
 		wire.Build(
 			newContainer,

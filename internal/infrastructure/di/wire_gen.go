@@ -17,24 +17,31 @@ import (
 	product3 "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/httpserver"
+	"stabulum/internal/infrastructure/postgres"
 	"stabulum/internal/infrastructure/postgres/product"
 )
 
 // Injectors from wire.go:
 
-func NewContainer(cfg config.Config) *Container {
+func NewContainer(cfg config.Config) (*Container, func(), error) {
 	httpserverConfig := config.NewHTTPServerConfig(cfg)
 	usecasesConfig := config.NewUsecasesConfig(cfg)
-	repository := product.NewRepository()
+	connection, cleanup, err := postgres.NewConnection()
+	if err != nil {
+		return nil, nil, err
+	}
+	repository := product.NewRepository(connection)
 	usecases := product2.NewUsecases(usecasesConfig, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
 	server := httpserver.New(httpserverConfig, engine)
 	container := newContainer(server)
-	return container
+	return container, func() {
+		cleanup()
+	}, nil
 }
 
-func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) *Container {
+func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) (*Container, func(), error) {
 	httpserverConfig := config.NewHTTPServerConfig(cfg)
 	usecasesConfig := config.NewUsecasesConfig(cfg)
 	repository := config.NewProductRepositoryMock(mockCfg)
@@ -43,7 +50,8 @@ func NewTestContainer(cfg config.Config, mockCfg config.MockConfig) *Container {
 	engine := router.New(handler)
 	server := httpserver.New(httpserverConfig, engine)
 	container := newContainer(server)
-	return container
+	return container, func() {
+	}, nil
 }
 
 // wire.go:
@@ -52,6 +60,6 @@ var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewHTTPServerConfig
 
 var apiSet = wire.NewSet(wire.Bind(new(http.Handler), new(*gin.Engine)), httpserver.New, router.New, product3.NewHandler)
 
-var productPostgresRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
+var productPostgresRepositorySet = wire.NewSet(postgres.NewConnection, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
 
 var productMockRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks.Repository)), config.NewProductRepositoryMock)

@@ -4,13 +4,17 @@ import (
 	"context"
 	"log"
 	"stabulum/internal/domain/product"
+	"stabulum/internal/infrastructure/postgres"
 )
 
 type Repository struct {
+	postgresConnection *postgres.Connection
 }
 
-func NewRepository() *Repository {
-	return &Repository{}
+func NewRepository(postgresConnection *postgres.Connection) *Repository {
+	return &Repository{
+		postgresConnection: postgresConnection,
+	}
 }
 
 func (r *Repository) Add(_ context.Context, p product.Product) error {

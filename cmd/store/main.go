@@ -7,12 +7,20 @@ import (
 )
 
 func main() {
-	diContainer := di.NewTestContainer(
+	diContainer, closeConnections, err := di.NewTestContainer(
 		config.ReadFromMemory(),
 		config.ReadFromMemoryMockConfig(),
 	)
 
+	if err != nil {
+		log.Println(err)
+
+		return
+	}
+
+	defer closeConnections()
+
 	server := diContainer.APIHTTPServer
 
-	log.Fatal(server.ListenAndServe())
+	log.Println(server.ListenAndServe())
 }
