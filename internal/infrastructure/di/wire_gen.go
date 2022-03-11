@@ -25,7 +25,7 @@ import (
 func NewContainer(cfg config.Config) *Container {
 	httpserverConfig := config.NewHTTPServerConfig(cfg)
 	usecasesConfig := config.NewUsecasesConfig(cfg)
-	repository := product.NewRepostiory()
+	repository := product.NewRepository()
 	usecases := product2.NewUsecases(usecasesConfig, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
@@ -52,6 +52,6 @@ var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewHTTPServerConfig
 
 var apiSet = wire.NewSet(wire.Bind(new(http.Handler), new(*gin.Engine)), httpserver.New, router.New, product3.NewHandler)
 
-var productPostgresRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepostiory)
+var productPostgresRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
 
 var productMockRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks.Repository)), config.NewProductRepositoryMock)

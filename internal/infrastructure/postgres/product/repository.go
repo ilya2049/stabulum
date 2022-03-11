@@ -9,7 +9,7 @@ import (
 type Repository struct {
 }
 
-func NewRepostiory() *Repository {
+func NewRepository() *Repository {
 	return &Repository{}
 }
 

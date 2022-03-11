@@ -3,7 +3,7 @@ package httpserver
 import "net/http"
 
 type Config struct {
-	Adderss string
+	Address string
 }
 
 type Server struct {
@@ -13,7 +13,7 @@ type Server struct {
 func New(config Config, handler http.Handler) *Server {
 	return &Server{
 		Server: &http.Server{
-			Addr: config.Adderss,
+			Addr: config.Address,
 
 			Handler: handler,
 		},

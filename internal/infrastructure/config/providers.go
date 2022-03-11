@@ -16,6 +16,6 @@ func NewUsecasesConfig(cfg Config) product.UsecasesConfig {
 
 func NewHTTPServerConfig(cfg Config) httpserver.Config {
 	return httpserver.Config{
-		Adderss: cfg.API.HTTPServer.Address,
+		Address: cfg.API.HTTPServer.Address,
 	}
 }
