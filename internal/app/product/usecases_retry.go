@@ -21,7 +21,7 @@ func (u *usecasesRetry) Create(ctx context.Context, p product.Product) (err erro
 			return nil
 		}
 
-		if attempt > u.config.MaxAttemtp {
+		if attempt > u.config.MaxAttempt {
 			return err
 		}
 

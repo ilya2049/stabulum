@@ -14,7 +14,7 @@ type ProductUsecasesConfig struct {
 }
 
 type ProductUsecasesRetryConfig struct {
-	MaxAttemtp int
+	MaxAttempt int
 	RetryDelay time.Duration
 }
 

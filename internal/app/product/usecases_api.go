@@ -10,11 +10,11 @@ type Usecases interface {
 	Create(context.Context, product.Product) error
 }
 
-func NewUsecases(config UsecasesConfig, productRepostiory product.Repository) Usecases {
+func NewUsecases(config UsecasesConfig, productRepository product.Repository) Usecases {
 	var uc Usecases
 
 	uc = &usecases{
-		productRepostiory: productRepostiory,
+		productRepository: productRepository,
 	}
 
 	uc = &usecasesRetry{
@@ -31,6 +31,6 @@ type UsecasesConfig struct {
 }
 
 type UsecasesRetryConfig struct {
-	MaxAttemtp int
+	MaxAttempt int
 	RetryDelay time.Duration
 }

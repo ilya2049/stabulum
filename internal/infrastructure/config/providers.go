@@ -8,7 +8,7 @@ import (
 func NewUsecasesConfig(cfg Config) product.UsecasesConfig {
 	return product.UsecasesConfig{
 		Retry: product.UsecasesRetryConfig{
-			MaxAttemtp: cfg.ProductUsecases.Retry.MaxAttemtp,
+			MaxAttempt: cfg.ProductUsecases.Retry.MaxAttempt,
 			RetryDelay: cfg.ProductUsecases.Retry.RetryDelay,
 		},
 	}

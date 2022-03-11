@@ -21,7 +21,7 @@ func ReadFromMemory() Config {
 		},
 		ProductUsecases: ProductUsecasesConfig{
 			Retry: ProductUsecasesRetryConfig{
-				MaxAttemtp: 10,
+				MaxAttempt: 10,
 				RetryDelay: time.Second,
 			},
 		},

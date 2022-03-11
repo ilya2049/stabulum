@@ -6,9 +6,9 @@ import (
 )
 
 type usecases struct {
-	productRepostiory product.Repository
+	productRepository product.Repository
 }
 
 func (u *usecases) Create(ctx context.Context, p product.Product) error {
-	return u.productRepostiory.Add(ctx, p)
+	return u.productRepository.Add(ctx, p)
 }
