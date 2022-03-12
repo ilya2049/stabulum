@@ -40,8 +40,8 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 	usecases := product2.NewUsecases(usecasesConfig, loggerLogger, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
-	server := httpserver.New(httpserverConfig, engine)
-	container := newContainer(server, loggerLogger)
+	server := httpserver.New(httpserverConfig, engine, loggerLogger)
+	container := newContainer(server)
 	return container, func() {
 		cleanup()
 	}, nil

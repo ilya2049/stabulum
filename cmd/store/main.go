@@ -17,11 +17,9 @@ func main() {
 		return
 	}
 
-	logger := diContainer.Logger
-
 	defer closeConnections()
 
 	server := diContainer.APIHTTPServer
-
-	logger.Println(server.ListenAndServe())
+	defer server.Shutdown()
+	server.ListenAndServeAsync()
 }
