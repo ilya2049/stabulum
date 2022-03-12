@@ -3,6 +3,7 @@ package di
 import (
 	"net/http/httptest"
 	"stabulum/internal/common/logger"
+	"stabulum/internal/common/testfixture"
 	"stabulum/internal/infrastructure/httpserver"
 )
 
@@ -20,10 +21,12 @@ func newContainer(apiHTTPServer *httpserver.Server, logger logger.Logger) *Conta
 
 type TestContainer struct {
 	APIHTTPTestServer *httptest.Server
+	SpyLogger         *testfixture.SpyLogger
 }
 
-func newTestContainer(apiHTTPTestServer *httptest.Server) *TestContainer {
+func newTestContainer(apiHTTPTestServer *httptest.Server, spyLogger *testfixture.SpyLogger) *TestContainer {
 	return &TestContainer{
+		SpyLogger:         spyLogger,
 		APIHTTPTestServer: apiHTTPTestServer,
 	}
 }

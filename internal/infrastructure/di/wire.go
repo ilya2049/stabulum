@@ -8,6 +8,7 @@ import (
 
 	appproduct "stabulum/internal/app/product"
 	"stabulum/internal/common/logger"
+	"stabulum/internal/common/testfixture"
 	"stabulum/internal/common/testfixture/mocks"
 	"stabulum/internal/domain/product"
 	mockproduct "stabulum/internal/domain/product/mocks"
@@ -86,12 +87,17 @@ func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 }
 
 var testDependenciesSet = wire.NewSet(
-	loggerSet,
+	spyLoggerSet,
 
 	newTestContainer,
 	httpserver.NewTestServer,
 
 	productMockRepositorySet,
+)
+
+var spyLoggerSet = wire.NewSet(
+	wire.Bind(new(logger.Logger), new(*testfixture.SpyLogger)),
+	testfixture.NewSpyLogger,
 )
 
 var productMockRepositorySet = wire.NewSet(

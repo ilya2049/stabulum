@@ -12,6 +12,7 @@ import (
 	"net/http"
 	product2 "stabulum/internal/app/product"
 	logger2 "stabulum/internal/common/logger"
+	"stabulum/internal/common/testfixture"
 	"stabulum/internal/common/testfixture/mocks"
 	product4 "stabulum/internal/domain/product"
 	mocks2 "stabulum/internal/domain/product/mocks"
@@ -47,13 +48,13 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 
 func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 	usecasesConfig := config.NewUsecasesConfig(cfg)
-	loggerLogger := logger.New()
-	repository := mocks.NewProductRepositoryMock(mockCfg, loggerLogger)
-	usecases := product2.NewUsecases(usecasesConfig, loggerLogger, repository)
+	spyLogger := testfixture.NewSpyLogger()
+	repository := mocks.NewProductRepositoryMock(mockCfg, spyLogger)
+	usecases := product2.NewUsecases(usecasesConfig, spyLogger, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
 	server := httpserver.NewTestServer(engine)
-	testContainer := newTestContainer(server)
+	testContainer := newTestContainer(server, spyLogger)
 	return testContainer
 }
 
@@ -82,9 +83,11 @@ var loggerSet = wire.NewSet(wire.Bind(new(logger2.Logger), new(*logger.Logger)),
 var productPostgresRepositorySet = wire.NewSet(postgres.NewConnection, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
 
 var testDependenciesSet = wire.NewSet(
-	loggerSet,
+	spyLoggerSet,
 
 	newTestContainer, httpserver.NewTestServer, productMockRepositorySet,
 )
+
+var spyLoggerSet = wire.NewSet(wire.Bind(new(logger2.Logger), new(*testfixture.SpyLogger)), testfixture.NewSpyLogger)
 
 var productMockRepositorySet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks2.Repository)), mocks.NewProductRepositoryMock)

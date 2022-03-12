@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect/v2"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -30,7 +31,7 @@ func TestProductCreate(t *testing.T) {
 		},
 		mocks.Config{
 			ConfigureProductRepository: func(r *mockproduct.Repository, logger logger.Logger) {
-				const maxFailedAttempt = 5
+				const maxFailedAttempt = 3
 				attempt := 1
 
 				r.On("Add", mock.Anything, mock.Anything).
@@ -59,4 +60,10 @@ func TestProductCreate(t *testing.T) {
 		WithJSON(productview.ProductView{Name: "Sticker"}).
 		Expect().
 		Status(http.StatusCreated)
+
+	assert.Equal(t, []string{
+		"usecase products create attempt 1 error unexpected test error\n",
+		"usecase products create attempt 2 error unexpected test error\n",
+		"product added in the mock repository: Product{Name: Sticker}\n",
+	}, diContainer.SpyLogger.Logs)
 }
