@@ -2,8 +2,8 @@ package product
 
 import (
 	"context"
-	"log"
 	"net/http"
+	"stabulum/internal/common/logger"
 	"stabulum/internal/common/testfixture"
 	"stabulum/internal/common/testfixture/mocks"
 	"stabulum/internal/domain/product"
@@ -29,14 +29,14 @@ func TestProductCreate(t *testing.T) {
 			},
 		},
 		mocks.Config{
-			ConfigureProductRepository: func(r *mockproduct.Repository) {
+			ConfigureProductRepository: func(r *mockproduct.Repository, logger logger.Logger) {
 				const maxFailedAttempt = 5
 				attempt := 1
 
 				r.On("Add", mock.Anything, mock.Anything).
 					Return(func(_ context.Context, p product.Product) error {
 						if attempt >= maxFailedAttempt {
-							log.Println("product added in the mock repository:", p.String())
+							logger.Println("product added in the mock repository:", p.String())
 							attempt = 0
 
 							return nil

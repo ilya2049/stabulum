@@ -11,6 +11,7 @@ import (
 	"github.com/google/wire"
 	"net/http"
 	product2 "stabulum/internal/app/product"
+	logger2 "stabulum/internal/common/logger"
 	"stabulum/internal/common/testfixture/mocks"
 	product4 "stabulum/internal/domain/product"
 	mocks2 "stabulum/internal/domain/product/mocks"
@@ -18,6 +19,7 @@ import (
 	product3 "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/httpserver"
+	"stabulum/internal/infrastructure/logger"
 	"stabulum/internal/infrastructure/postgres"
 	"stabulum/internal/infrastructure/postgres/product"
 )
@@ -27,16 +29,17 @@ import (
 func NewContainer(cfg config.Config) (*Container, func(), error) {
 	httpserverConfig := config.NewHTTPServerConfig(cfg)
 	usecasesConfig := config.NewUsecasesConfig(cfg)
+	loggerLogger := logger.New()
 	connection, cleanup, err := postgres.NewConnection()
 	if err != nil {
 		return nil, nil, err
 	}
-	repository := product.NewRepository(connection)
-	usecases := product2.NewUsecases(usecasesConfig, repository)
+	repository := product.NewRepository(loggerLogger, connection)
+	usecases := product2.NewUsecases(usecasesConfig, loggerLogger, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
 	server := httpserver.New(httpserverConfig, engine)
-	container := newContainer(server)
+	container := newContainer(server, loggerLogger)
 	return container, func() {
 		cleanup()
 	}, nil
@@ -44,8 +47,9 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 
 func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 	usecasesConfig := config.NewUsecasesConfig(cfg)
-	repository := mocks.NewProductRepositoryMock(mockCfg)
-	usecases := product2.NewUsecases(usecasesConfig, repository)
+	loggerLogger := logger.New()
+	repository := mocks.NewProductRepositoryMock(mockCfg, loggerLogger)
+	usecases := product2.NewUsecases(usecasesConfig, loggerLogger, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
 	server := httpserver.NewTestServer(engine)
@@ -66,14 +70,20 @@ var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewHTTPServerConfig
 var apiSet = wire.NewSet(wire.Bind(new(http.Handler), new(*gin.Engine)), httpserver.New, router.New, product3.NewHandler)
 
 var productionDependenciesSet = wire.NewSet(
+	loggerSet,
+
 	newContainer,
 
 	productPostgresRepositorySet,
 )
 
+var loggerSet = wire.NewSet(wire.Bind(new(logger2.Logger), new(*logger.Logger)), logger.New)
+
 var productPostgresRepositorySet = wire.NewSet(postgres.NewConnection, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
 
 var testDependenciesSet = wire.NewSet(
+	loggerSet,
+
 	newTestContainer, httpserver.NewTestServer, productMockRepositorySet,
 )
 

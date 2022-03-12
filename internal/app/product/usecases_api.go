@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"stabulum/internal/common/logger"
 	"stabulum/internal/domain/product"
 	"time"
 )
@@ -10,7 +11,11 @@ type Usecases interface {
 	Create(context.Context, product.Product) error
 }
 
-func NewUsecases(config UsecasesConfig, productRepository product.Repository) Usecases {
+func NewUsecases(
+	config UsecasesConfig,
+	logger logger.Logger,
+	productRepository product.Repository,
+) Usecases {
 	var uc Usecases
 
 	uc = &usecases{
@@ -18,8 +23,8 @@ func NewUsecases(config UsecasesConfig, productRepository product.Repository) Us
 	}
 
 	uc = &usecasesRetry{
-		next: uc,
-
+		next:   uc,
+		logger: logger,
 		config: config.Retry,
 	}
 

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	appproduct "stabulum/internal/app/product"
+	"stabulum/internal/common/logger"
 	"stabulum/internal/common/testfixture/mocks"
 	"stabulum/internal/domain/product"
 	mockproduct "stabulum/internal/domain/product/mocks"
@@ -14,6 +15,7 @@ import (
 	apiproduct "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/httpserver"
+	infrastructureLogger "stabulum/internal/infrastructure/logger"
 	"stabulum/internal/infrastructure/postgres"
 	pgproduct "stabulum/internal/infrastructure/postgres/product"
 	"stabulum/internal/pkg/connection"
@@ -54,9 +56,16 @@ var apiSet = wire.NewSet(
 )
 
 var productionDependenciesSet = wire.NewSet(
+	loggerSet,
+
 	newContainer,
 
 	productPostgresRepositorySet,
+)
+
+var loggerSet = wire.NewSet(
+	wire.Bind(new(logger.Logger), new(*infrastructureLogger.Logger)),
+	infrastructureLogger.New,
 )
 
 var productPostgresRepositorySet = wire.NewSet(
@@ -77,6 +86,8 @@ func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 }
 
 var testDependenciesSet = wire.NewSet(
+	loggerSet,
+
 	newTestContainer,
 	httpserver.NewTestServer,
 

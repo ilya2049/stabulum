@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/di"
 )
@@ -11,8 +10,10 @@ func main() {
 		config.ReadFromMemory(),
 	)
 
+	logger := diContainer.Logger
+
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 
 		return
 	}
@@ -21,5 +22,5 @@ func main() {
 
 	server := diContainer.APIHTTPServer
 
-	log.Println(server.ListenAndServe())
+	logger.Println(server.ListenAndServe())
 }
