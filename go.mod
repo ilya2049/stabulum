@@ -6,6 +6,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/wire v0.5.0
+	github.com/lib/pq v1.10.4
 	github.com/stretchr/testify v1.7.0
 )
 

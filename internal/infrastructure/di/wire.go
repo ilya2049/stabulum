@@ -36,22 +36,17 @@ func NewContainer(cfg config.Config) (*Container, connection.Close, error) {
 }
 
 var appSet = wire.NewSet(
-	configSet,
-
 	apiSet,
 
 	appproduct.NewUsecases,
-)
-
-var configSet = wire.NewSet(
 	config.NewUsecasesConfig,
-	config.NewHTTPServerConfig,
 )
 
 var apiSet = wire.NewSet(
 	wire.Bind(new(http.Handler), new(*gin.Engine)),
 	httpserver.New,
 	router.New,
+	config.NewHTTPServerConfig,
 
 	apiproduct.NewHandler,
 )
@@ -71,6 +66,7 @@ var loggerSet = wire.NewSet(
 
 var productPostgresRepositorySet = wire.NewSet(
 	postgres.NewConnection,
+	config.NewPostgresConfig,
 
 	wire.Bind(new(product.Repository), new(*pgproduct.Repository)),
 	pgproduct.NewRepository,

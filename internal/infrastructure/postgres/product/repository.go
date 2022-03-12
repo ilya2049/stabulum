@@ -2,19 +2,19 @@ package product
 
 import (
 	"context"
+	"database/sql"
 	"stabulum/internal/common/logger"
 	"stabulum/internal/domain/product"
-	"stabulum/internal/infrastructure/postgres"
 )
 
 type Repository struct {
 	logger             logger.Logger
-	postgresConnection *postgres.Connection
+	postgresConnection *sql.DB
 }
 
 func NewRepository(
 	logger logger.Logger,
-	postgresConnection *postgres.Connection,
+	postgresConnection *sql.DB,
 ) *Repository {
 	return &Repository{
 		logger:             logger,

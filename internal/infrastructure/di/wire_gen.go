@@ -31,11 +31,12 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 	httpserverConfig := config.NewHTTPServerConfig(cfg)
 	usecasesConfig := config.NewUsecasesConfig(cfg)
 	loggerLogger := logger.New()
-	connection, cleanup, err := postgres.NewConnection()
+	postgresConfig := config.NewPostgresConfig(cfg)
+	db, cleanup, err := postgres.NewConnection(postgresConfig, loggerLogger)
 	if err != nil {
 		return nil, nil, err
 	}
-	repository := product.NewRepository(loggerLogger, connection)
+	repository := product.NewRepository(loggerLogger, db)
 	usecases := product2.NewUsecases(usecasesConfig, loggerLogger, repository)
 	handler := product3.NewHandler(usecases)
 	engine := router.New(handler)
@@ -61,14 +62,10 @@ func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 // wire.go:
 
 var appSet = wire.NewSet(
-	configSet,
-
-	apiSet, product2.NewUsecases,
+	apiSet, product2.NewUsecases, config.NewUsecasesConfig,
 )
 
-var configSet = wire.NewSet(config.NewUsecasesConfig, config.NewHTTPServerConfig)
-
-var apiSet = wire.NewSet(wire.Bind(new(http.Handler), new(*gin.Engine)), httpserver.New, router.New, product3.NewHandler)
+var apiSet = wire.NewSet(wire.Bind(new(http.Handler), new(*gin.Engine)), httpserver.New, router.New, config.NewHTTPServerConfig, product3.NewHandler)
 
 var productionDependenciesSet = wire.NewSet(
 	loggerSet,
@@ -80,7 +77,7 @@ var productionDependenciesSet = wire.NewSet(
 
 var loggerSet = wire.NewSet(wire.Bind(new(logger2.Logger), new(*logger.Logger)), logger.New)
 
-var productPostgresRepositorySet = wire.NewSet(postgres.NewConnection, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
+var productPostgresRepositorySet = wire.NewSet(postgres.NewConnection, config.NewPostgresConfig, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository)
 
 var testDependenciesSet = wire.NewSet(
 	spyLoggerSet,

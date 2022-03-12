@@ -7,6 +7,7 @@ import (
 type Config struct {
 	API             APIConfig
 	ProductUsecases ProductUsecasesConfig
+	Postgres        PostgresConfig
 }
 
 type ProductUsecasesConfig struct {
@@ -24,4 +25,12 @@ type APIConfig struct {
 
 type APIHTTPServerConfig struct {
 	Address string
+}
+
+type PostgresConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Database string
 }
