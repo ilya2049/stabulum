@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/di"
 )
@@ -10,13 +11,13 @@ func main() {
 		config.ReadFromMemory(),
 	)
 
-	logger := diContainer.Logger
-
 	if err != nil {
-		logger.Println(err)
+		log.Println(err)
 
 		return
 	}
+
+	logger := diContainer.Logger
 
 	defer closeConnections()
 
