@@ -4,14 +4,15 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"stabulum/internal/common/testfixture"
+	"stabulum/internal/common/testfixture/mocks"
 	"stabulum/internal/domain/product"
 	mockproduct "stabulum/internal/domain/product/mocks"
 	productview "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
 	"stabulum/internal/infrastructure/di"
-	"stabulum/internal/testfixture"
-	"stabulum/internal/testfixture/mocks"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/mock"
@@ -19,7 +20,14 @@ import (
 
 func TestProductCreate(t *testing.T) {
 	diContainer := di.NewTestContainer(
-		config.ReadFromMemory(),
+		config.Config{
+			ProductUsecases: config.ProductUsecasesConfig{
+				Retry: config.ProductUsecasesRetryConfig{
+					MaxAttempt: 10,
+					RetryDelay: time.Millisecond,
+				},
+			},
+		},
 		mocks.Config{
 			ConfigureProductRepository: func(r *mockproduct.Repository) {
 				const maxFailedAttempt = 5

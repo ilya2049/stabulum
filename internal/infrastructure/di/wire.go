@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	appproduct "stabulum/internal/app/product"
+	"stabulum/internal/common/testfixture/mocks"
 	"stabulum/internal/domain/product"
 	mockproduct "stabulum/internal/domain/product/mocks"
 	"stabulum/internal/infrastructure/api/router"
@@ -16,7 +17,6 @@ import (
 	"stabulum/internal/infrastructure/postgres"
 	pgproduct "stabulum/internal/infrastructure/postgres/product"
 	"stabulum/internal/pkg/connection"
-	"stabulum/internal/testfixture/mocks"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"

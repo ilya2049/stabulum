@@ -11,6 +11,7 @@ import (
 	"github.com/google/wire"
 	"net/http"
 	product2 "stabulum/internal/app/product"
+	"stabulum/internal/common/testfixture/mocks"
 	product4 "stabulum/internal/domain/product"
 	mocks2 "stabulum/internal/domain/product/mocks"
 	"stabulum/internal/infrastructure/api/router"
@@ -19,7 +20,6 @@ import (
 	"stabulum/internal/infrastructure/httpserver"
 	"stabulum/internal/infrastructure/postgres"
 	"stabulum/internal/infrastructure/postgres/product"
-	"stabulum/internal/testfixture/mocks"
 )
 
 // Injectors from wire.go:
