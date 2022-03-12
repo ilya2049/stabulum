@@ -10,6 +10,7 @@ func New(productHandler *product.Handler) *gin.Engine {
 	r := gin.Default()
 
 	r.POST("/product", productHandler.Create)
+	r.GET("/product", productHandler.List)
 
 	return r
 }

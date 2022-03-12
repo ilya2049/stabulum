@@ -20,7 +20,7 @@ import (
 )
 
 func TestProductCreate(t *testing.T) {
-	diContainer := di.NewTestContainer(
+	diContainer, _, _ := di.NewTestContainer(
 		config.Config{
 			ProductUsecases: config.ProductUsecasesConfig{
 				Retry: config.ProductUsecasesRetryConfig{

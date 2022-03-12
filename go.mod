@@ -6,6 +6,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/wire v0.5.0
+	github.com/huandu/go-sqlbuilder v1.13.0
 	github.com/lib/pq v1.10.4
 	github.com/stretchr/testify v1.7.0
 )
@@ -22,6 +23,7 @@ require (
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imkira/go-interpol v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/klauspost/compress v1.12.2 // indirect

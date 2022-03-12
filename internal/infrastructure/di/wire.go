@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	appproduct "stabulum/internal/app/product"
+	"stabulum/internal/app/queries"
 	"stabulum/internal/common/logger"
 	"stabulum/internal/common/testfixture"
 	"stabulum/internal/common/testfixture/mocks"
@@ -19,6 +20,7 @@ import (
 	infrastructureLogger "stabulum/internal/infrastructure/logger"
 	"stabulum/internal/infrastructure/postgres"
 	pgproduct "stabulum/internal/infrastructure/postgres/product"
+	pgqueries "stabulum/internal/infrastructure/postgres/queries"
 	"stabulum/internal/pkg/connection"
 
 	"github.com/gin-gonic/gin"
@@ -56,7 +58,7 @@ var productionDependenciesSet = wire.NewSet(
 
 	newContainer,
 
-	productPostgresRepositorySet,
+	productPostgresStorageSet,
 )
 
 var loggerSet = wire.NewSet(
@@ -64,15 +66,18 @@ var loggerSet = wire.NewSet(
 	infrastructureLogger.New,
 )
 
-var productPostgresRepositorySet = wire.NewSet(
+var productPostgresStorageSet = wire.NewSet(
 	postgres.NewConnection,
 	config.NewPostgresConfig,
 
 	wire.Bind(new(product.Repository), new(*pgproduct.Repository)),
 	pgproduct.NewRepository,
+
+	wire.Bind(new(queries.ProductQuerier), new(*pgqueries.Querier)),
+	pgqueries.NewQuerier,
 )
 
-func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
+func NewTestContainer(cfg config.Config, mockCfg mocks.Config) (*TestContainer, connection.Close, error) {
 	panic(
 		wire.Build(
 			appSet,
@@ -88,7 +93,7 @@ var testDependenciesSet = wire.NewSet(
 	newTestContainer,
 	httpserver.NewTestServer,
 
-	productMockRepositorySet,
+	productMockStorageSet,
 )
 
 var spyLoggerSet = wire.NewSet(
@@ -96,7 +101,13 @@ var spyLoggerSet = wire.NewSet(
 	testfixture.NewSpyLogger,
 )
 
-var productMockRepositorySet = wire.NewSet(
+var productMockStorageSet = wire.NewSet(
 	wire.Bind(new(product.Repository), new(*mockproduct.Repository)),
 	mocks.NewProductRepositoryMock,
+
+	postgres.NewConnection,
+	config.NewPostgresConfig,
+
+	wire.Bind(new(queries.ProductQuerier), new(*pgqueries.Querier)),
+	pgqueries.NewQuerier,
 )
