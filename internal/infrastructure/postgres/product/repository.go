@@ -3,27 +3,31 @@ package product
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"stabulum/internal/common/logger"
 	"stabulum/internal/domain/product"
+	"stabulum/internal/infrastructure/postgres"
 )
 
 type Repository struct {
-	logger             logger.Logger
-	postgresConnection *sql.DB
+	logger logger.Logger
+	db     *sql.DB
 }
 
-func NewRepository(
-	logger logger.Logger,
-	postgresConnection *sql.DB,
-) *Repository {
+func NewRepository(logger logger.Logger, db *sql.DB) *Repository {
 	return &Repository{
-		logger:             logger,
-		postgresConnection: postgresConnection,
+		logger: logger,
+		db:     db,
 	}
 }
 
-func (r *Repository) Add(_ context.Context, p product.Product) error {
-	r.logger.Println("product added in the postgres repository:", p.String())
+func (r *Repository) Add(ctx context.Context, p product.Product) error {
+	const query = `INSERT INTO products(name) VALUES ($1);`
+
+	_, err := r.db.ExecContext(ctx, query, p.Name)
+	if err != nil {
+		return fmt.Errorf("%s: failed to add a product: %w", postgres.Component, err)
+	}
 
 	return nil
 }
