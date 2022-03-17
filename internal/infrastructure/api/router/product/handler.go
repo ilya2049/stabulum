@@ -27,7 +27,7 @@ func NewHandler(
 
 func (h *Handler) Create(c *gin.Context) {
 	var productView ProductView
-	if err := c.ShouldBindJSON(&productView); err != nil {
+	if err := api.ShouldBindJSON(c, &productView); err != nil {
 		c.JSON(http.StatusBadRequest, api.Error{Error: err.Error()})
 
 		return
