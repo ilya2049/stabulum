@@ -19,4 +19,4 @@ MOCKERY_CMD=mockery --case=underscore
 .PHONY: mocks
 mocks:
 	${MOCKERY_CMD} --dir=./internal/domain/product --output=./internal/domain/product/mocks --name=Repository
-	${MOCKERY_CMD} --dir=./internal/domain/product --output=./internal/domain/product/mocks --name=Repository
+	${MOCKERY_CMD} --dir=./internal/app/queries --output=./internal/app/queries/mocks --name=ProductQuerier

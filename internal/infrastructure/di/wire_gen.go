@@ -12,6 +12,7 @@ import (
 	"net/http"
 	product2 "stabulum/internal/app/product"
 	queries2 "stabulum/internal/app/queries"
+	mocks3 "stabulum/internal/app/queries/mocks"
 	logger2 "stabulum/internal/common/logger"
 	"stabulum/internal/common/testfixture"
 	"stabulum/internal/common/testfixture/mocks"
@@ -38,7 +39,7 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	repository := product.NewRepository(loggerLogger, db)
+	repository := product.NewRepository(db)
 	usecases := product2.NewUsecases(usecasesConfig, loggerLogger, repository)
 	querier := queries.NewQuerier(db, loggerLogger)
 	handler := product3.NewHandler(usecases, querier)
@@ -50,24 +51,17 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 	}, nil
 }
 
-func NewTestContainer(cfg config.Config, mockCfg mocks.Config) (*TestContainer, func(), error) {
+func NewTestContainer(cfg config.Config, mockCfg mocks.Config) *TestContainer {
 	usecasesConfig := config.NewUsecasesConfig(cfg)
 	spyLogger := testfixture.NewSpyLogger()
 	repository := mocks.NewProductRepositoryMock(mockCfg, spyLogger)
 	usecases := product2.NewUsecases(usecasesConfig, spyLogger, repository)
-	postgresConfig := config.NewPostgresConfig(cfg)
-	db, cleanup, err := postgres.NewConnection(postgresConfig, spyLogger)
-	if err != nil {
-		return nil, nil, err
-	}
-	querier := queries.NewQuerier(db, spyLogger)
-	handler := product3.NewHandler(usecases, querier)
+	productQuerier := mocks.NewProductQuerierMock(mockCfg, spyLogger)
+	handler := product3.NewHandler(usecases, productQuerier)
 	engine := router.New(handler)
 	server := httpserver.NewTestServer(engine)
 	testContainer := newTestContainer(server, spyLogger)
-	return testContainer, func() {
-		cleanup()
-	}, nil
+	return testContainer
 }
 
 // wire.go:
@@ -83,19 +77,19 @@ var productionDependenciesSet = wire.NewSet(
 
 	newContainer,
 
-	productPostgresStorageSet,
+	postgresStorageSet,
 )
 
 var loggerSet = wire.NewSet(wire.Bind(new(logger2.Logger), new(*logger.Logger)), logger.New)
 
-var productPostgresStorageSet = wire.NewSet(postgres.NewConnection, config.NewPostgresConfig, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository, wire.Bind(new(queries2.ProductQuerier), new(*queries.Querier)), queries.NewQuerier)
+var postgresStorageSet = wire.NewSet(postgres.NewConnection, config.NewPostgresConfig, wire.Bind(new(product4.Repository), new(*product.Repository)), product.NewRepository, wire.Bind(new(queries2.ProductQuerier), new(*queries.Querier)), queries.NewQuerier)
 
 var testDependenciesSet = wire.NewSet(
 	spyLoggerSet,
 
-	newTestContainer, httpserver.NewTestServer, productMockStorageSet,
+	newTestContainer, httpserver.NewTestServer, mockStorageSet,
 )
 
 var spyLoggerSet = wire.NewSet(wire.Bind(new(logger2.Logger), new(*testfixture.SpyLogger)), testfixture.NewSpyLogger)
 
-var productMockStorageSet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks2.Repository)), mocks.NewProductRepositoryMock, postgres.NewConnection, config.NewPostgresConfig, wire.Bind(new(queries2.ProductQuerier), new(*queries.Querier)), queries.NewQuerier)
+var mockStorageSet = wire.NewSet(wire.Bind(new(product4.Repository), new(*mocks2.Repository)), mocks.NewProductRepositoryMock, wire.Bind(new(queries2.ProductQuerier), new(*mocks3.ProductQuerier)), mocks.NewProductQuerierMock)

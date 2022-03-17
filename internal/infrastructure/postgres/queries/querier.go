@@ -39,13 +39,13 @@ func (q *Querier) FindProducts(ctx context.Context, query queries.ProductListQue
 
 	defer postgres.HandleRowsError(rows, func(err error) {
 		q.logger.Println(
-			fmt.Sprintf("%s: rows error after retrieving buys that will recoup: %s", postgres.Component, err.Error()),
+			fmt.Sprintf("%s: rows error after retrieving products: %s", postgres.Component, err.Error()),
 		)
 	})
 
 	defer postgres.CloseRows(rows, func(err error) {
 		q.logger.Println(
-			fmt.Sprintf("%s: failed to close rows after retrieving buys that will recoup: %s", postgres.Component, err.Error()),
+			fmt.Sprintf("%s: failed to close rows after retrieving products: %s", postgres.Component, err.Error()),
 		)
 	})
 
@@ -59,7 +59,7 @@ func (q *Querier) FindProducts(ctx context.Context, query queries.ProductListQue
 		)
 
 		if err != nil {
-			return queries.ProductList{}, fmt.Errorf("%s: failed to scan a buy that will recoup: %w",
+			return queries.ProductList{}, fmt.Errorf("%s: failed to scan a product: %w",
 				postgres.Component, err,
 			)
 		}

@@ -4,20 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"stabulum/internal/common/logger"
 	"stabulum/internal/domain/product"
 	"stabulum/internal/infrastructure/postgres"
 )
 
 type Repository struct {
-	logger logger.Logger
-	db     *sql.DB
+	db *sql.DB
 }
 
-func NewRepository(logger logger.Logger, db *sql.DB) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		logger: logger,
-		db:     db,
+		db: db,
 	}
 }
 
