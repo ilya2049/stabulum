@@ -20,6 +20,6 @@ func main() {
 	defer closeConnections()
 
 	server := diContainer.APIHTTPServer
-	defer server.Shutdown()
 	server.ListenAndServeAsync()
+	server.WaitForShutdown()
 }

@@ -18,9 +18,14 @@ type Config struct {
 type Server struct {
 	httpServer *http.Server
 	logger     logger.Logger
+
+	quitChannel chan os.Signal
 }
 
 func New(config Config, handler http.Handler, logger logger.Logger) *Server {
+	quitChannel := make(chan os.Signal, 1)
+	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
+
 	return &Server{
 		httpServer: &http.Server{
 			Addr: config.Address,
@@ -28,7 +33,8 @@ func New(config Config, handler http.Handler, logger logger.Logger) *Server {
 			Handler: handler,
 		},
 
-		logger: logger,
+		logger:      logger,
+		quitChannel: quitChannel,
 	}
 }
 
@@ -39,16 +45,14 @@ func (s *Server) ListenAndServeAsync() {
 		if err := s.httpServer.ListenAndServe(); err != nil {
 			if !errors.Is(err, http.ErrServerClosed) {
 				s.logger.Println("failed to listen and serve an http server:", err.Error())
+				s.quitChannel <- syscall.SIGINT
 			}
 		}
 	}()
 }
 
-func (s *Server) Shutdown() {
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
-	<-quit
+func (s *Server) WaitForShutdown() {
+	<-s.quitChannel
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
