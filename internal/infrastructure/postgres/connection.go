@@ -8,6 +8,8 @@ import (
 
 	// Postgres driver.
 	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 const Component = "postgres"
@@ -20,7 +22,12 @@ type Config struct {
 	Database string
 }
 
-func NewConnection(cfg Config, logger logger.Logger) (*sql.DB, connection.Close, error) {
+type Connection struct {
+	SQLDB  *sql.DB
+	GormDB *gorm.DB
+}
+
+func NewConnection(cfg Config, logger logger.Logger) (Connection, connection.Close, error) {
 	dataSourceName := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host,
 		cfg.Port,
@@ -29,19 +36,20 @@ func NewConnection(cfg Config, logger logger.Logger) (*sql.DB, connection.Close,
 		cfg.Database,
 	)
 
-	connection, err := sql.Open("postgres", dataSourceName)
+	gormDB, err := gorm.Open(postgres.Open(dataSourceName), &gorm.Config{})
 	if err != nil {
-		return nil, nil, fmt.Errorf("%s: failed to create a postgres connection: %w", Component, err)
+		return Connection{}, nil, fmt.Errorf("%s: failed to create a postgres connection: %w", Component, err)
 	}
 
-	if err := connection.Ping(); err != nil {
-		return nil, nil, fmt.Errorf("%s: failed to connect to postgres: %w", Component, err)
+	sqlDB, err := gormDB.DB()
+	if err != nil {
+		return Connection{}, nil, fmt.Errorf("%s: failed to separate sql db from gorm db: %w", Component, err)
 	}
 
 	logger.Println(Component + ": connection established")
 
-	return connection, func() {
-		if err := connection.Close(); err != nil {
+	return Connection{SQLDB: sqlDB, GormDB: gormDB}, func() {
+		if err := sqlDB.Close(); err != nil {
 			logger.Println(Component + ": failed to close postgres connection pull: " + err.Error())
 
 			return

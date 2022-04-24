@@ -26,13 +26,13 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 	httpserverConfig := config.NewHTTPServerConfig(cfg)
 	loggerLogger := logger.New()
 	postgresConfig := config.NewPostgresConfig(cfg)
-	db, closePostgresConnection, err := postgres.NewConnection(postgresConfig, loggerLogger)
+	postgresConnection, closePostgresConnection, err := postgres.NewConnection(postgresConfig, loggerLogger)
 	if err != nil {
 		return nil, nil, err
 	}
-	repository := pgproduct.NewRepository(db)
+	repository := pgproduct.NewRepository(postgresConnection.SQLDB)
 	usecases := appproduct.NewUsecases(repository)
-	querier := queries.NewQuerier(db, loggerLogger)
+	querier := queries.NewQuerier(postgresConnection.GormDB, loggerLogger)
 	handler := apiroduct.NewHandler(usecases, querier)
 	engine := router.New(handler)
 	server := httpserver.New(httpserverConfig, engine, loggerLogger)
