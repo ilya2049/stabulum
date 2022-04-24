@@ -2,6 +2,7 @@ package di
 
 import (
 	appproduct "stabulum/internal/app/product"
+	"stabulum/internal/common/event"
 	"stabulum/internal/infrastructure/api/router"
 	apiroduct "stabulum/internal/infrastructure/api/router/product"
 	"stabulum/internal/infrastructure/config"
@@ -24,18 +25,21 @@ func newContainer(apiHTTPServer *httpserver.Server) *Container {
 
 func NewContainer(cfg config.Config) (*Container, func(), error) {
 	httpserverConfig := config.NewHTTPServerConfig(cfg)
-	loggerLogger := logger.New()
+	aLogger := logger.New()
+	loggerEventHandler := logger.NewEventHandler(aLogger)
 	postgresConfig := config.NewPostgresConfig(cfg)
-	postgresConnection, closePostgresConnection, err := postgres.NewConnection(postgresConfig, loggerLogger)
+	postgresConnection, closePostgresConnection, err := postgres.NewConnection(postgresConfig, aLogger)
 	if err != nil {
 		return nil, nil, err
 	}
 	repository := pgproduct.NewRepository(postgresConnection.SQLDB)
-	usecases := appproduct.NewUsecases(repository)
-	querier := queries.NewQuerier(postgresConnection.GormDB, loggerLogger)
+	eventBus := event.NewBus()
+	loggerEventHandler.RegisterEvents(eventBus)
+	usecases := appproduct.NewUsecases(repository, eventBus)
+	querier := queries.NewQuerier(postgresConnection.GormDB, aLogger)
 	handler := apiroduct.NewHandler(usecases, querier)
 	engine := router.New(handler)
-	server := httpserver.New(httpserverConfig, engine, loggerLogger)
+	server := httpserver.New(httpserverConfig, engine, aLogger)
 	container := newContainer(server)
 	return container, func() {
 		closePostgresConnection()
