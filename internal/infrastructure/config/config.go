@@ -1,22 +1,8 @@
 package config
 
-import (
-	"time"
-)
-
 type Config struct {
-	API             APIConfig
-	ProductUsecases ProductUsecasesConfig
-	Postgres        PostgresConfig
-}
-
-type ProductUsecasesConfig struct {
-	Retry ProductUsecasesRetryConfig
-}
-
-type ProductUsecasesRetryConfig struct {
-	MaxAttempt int
-	RetryDelay time.Duration
+	API      APIConfig
+	Postgres PostgresConfig
 }
 
 type APIConfig struct {
