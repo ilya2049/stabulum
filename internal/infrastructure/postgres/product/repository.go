@@ -2,17 +2,16 @@ package product
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"stabulum/internal/domain/product"
 	"stabulum/internal/infrastructure/postgres"
 )
 
 type Repository struct {
-	db *sql.DB
+	db postgres.DB
 }
 
-func NewRepository(db *sql.DB) *Repository {
+func NewRepository(db postgres.DB) *Repository {
 	return &Repository{
 		db: db,
 	}
