@@ -32,10 +32,11 @@ func NewContainer(cfg config.Config) (*Container, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	repository := pgproduct.NewRepository(postgresConnection.SQLDB)
+
 	eventBus := event.NewBus()
+	repository := pgproduct.NewRepository(postgresConnection.SQLDB, postgresConnection.SQLDB, eventBus)
 	loggerEventHandler.RegisterEvents(eventBus)
-	usecases := appproduct.NewUsecases(repository, eventBus)
+	usecases := appproduct.NewUsecases(repository)
 	querier := queries.NewQuerier(postgresConnection.GormDB, aLogger)
 	handler := apiroduct.NewHandler(usecases, querier)
 	engine := router.New(handler)
